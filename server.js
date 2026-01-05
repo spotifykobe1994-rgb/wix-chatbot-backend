@@ -17,16 +17,41 @@ app.post("/chat", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: userMessage
-      })
+  model: "gpt-4.1-mini",
+  input: [
+    {
+      role: "system",
+      content: [
+        {
+          type: "text",
+          text: "Sei l’assistente ufficiale di Shi.Ku.Dama Terrarium. Rispondi in modo intelligente, naturale e cordiale. Se l’utente saluta, saluta. Se fa domande sui terrarium, rispondi in modo competente."
+        }
+      ]
+    },
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: userMessage
+        }
+      ]
+    }
+  ]
+})
     });
 
     const data = await response.json();
 
-    const reply =
-      data.output?.[0]?.content?.[0]?.text ||
-      "Errore nella risposta del modello";
+    let reply = "Ciao! 👋 Come posso aiutarti?";
+
+if (data.output && data.output.length > 0) {
+  const content = data.output[0].content || [];
+  reply = content
+    .filter(item => item.type === "output_text")
+    .map(item => item.text)
+    .join(" ");
+}
 
     res.json({ reply });
 
