@@ -1,21 +1,20 @@
 import express from "express";
-import fetch from "node-fetch";
 import cors from "cors";
+import fetch from "node-fetch";
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
 app.post("/chat", async (req, res) => {
+  const userMessage = req.body.message;
+
+  if (!userMessage) {
+    return res.json({ reply: "Messaggio mancante." });
+  }
+
   try {
-    const userMessage = req.body.message;
-
-    if (!userMessage) {
-      return res.json({ reply: "Dimmi pure 😊" });
-    }
-
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -23,10 +22,10 @@ app.post("/chat", async (req, res) => {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        input: [
+        messages: [
           {
             role: "system",
-            content: "Sei l’assistente ufficiale di Shi.Ku.Dama Terrarium. Rispondi in modo chiaro, utile e naturale."
+            content: "Sei l’assistente ufficiale di Shi.Ku.Dama Terrarium. Rispondi in modo chiaro, utile e professionale."
           },
           {
             role: "user",
@@ -38,21 +37,15 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    let reply = "Non sono riuscito a rispondere 😕";
-
-    if (data.output && data.output.length > 0) {
-      const content = data.output[0].content || [];
-      reply = content
-        .filter(c => c.type === "output_text")
-        .map(c => c.text)
-        .join(" ");
-    }
+    const reply =
+      data.choices?.[0]?.message?.content ||
+      "Errore: risposta AI non disponibile";
 
     res.json({ reply });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ reply: "Errore del server" });
+    res.status(500).json({ reply: "Errore server." });
   }
 });
 
