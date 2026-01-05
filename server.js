@@ -9,7 +9,6 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Chatbot backend attivo");
 });
-app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
 
