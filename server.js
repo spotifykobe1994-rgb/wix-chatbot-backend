@@ -34,8 +34,7 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    res.json({
-      reply: data.choices[0].message.content,
+ res.json({ reply: data.output_text });
     });
   } catch (error) {
     console.error(error);
