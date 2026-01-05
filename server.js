@@ -10,7 +10,7 @@ app.post("/chat", async (req, res) => {
   const userMessage = req.body.message;
 
   if (!userMessage) {
-    return res.json({ reply: "Messaggio mancante." });
+    return res.json({ reply: "Messaggio vuoto" });
   }
 
   try {
@@ -21,31 +21,35 @@ app.post("/chat", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
-            content: "Sei l’assistente ufficiale di Shi.Ku.Dama Terrarium. Rispondi in modo chiaro, utile e professionale."
+            content: "Sei l’assistente ufficiale di Shi.Ku.Dama Terrarium. Rispondi in modo naturale, utile e intelligente."
           },
           {
             role: "user",
             content: userMessage
           }
-        ]
+        ],
+        temperature: 0.7
       })
     });
 
     const data = await response.json();
 
-    const reply =
-      data.choices?.[0]?.message?.content ||
-      "Errore: risposta AI non disponibile";
+    if (!data.choices || !data.choices[0]) {
+      console.error("Risposta OpenAI invalida:", data);
+      return res.json({ reply: "Errore: risposta AI non disponibile" });
+    }
 
-    res.json({ reply });
+    res.json({
+      reply: data.choices[0].message.content
+    });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ reply: "Errore server." });
+  } catch (error) {
+    console.error("Errore OpenAI:", error);
+    res.status(500).json({ reply: "Errore server" });
   }
 });
 
