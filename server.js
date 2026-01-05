@@ -41,20 +41,28 @@ app.post("/chat", async (req, res) => {
 })
     });
 
-    const data = await response.json();
+   const data = await response.json();
 
-    let reply = "Ciao! 👋 Come posso aiutarti?";
+let reply = "Scusa, non ho capito la domanda.";
 
-if (data.output && data.output.length > 0) {
-  const content = data.output[0].content || [];
-  reply = content
-    .filter(item => item.type === "output_text")
-    .map(item => item.text)
-    .join(" ");
+try {
+  const output = data.output?.[0]?.content;
+
+  if (Array.isArray(output)) {
+    const text = output
+      .filter(item => item.type === "output_text")
+      .map(item => item.text)
+      .join(" ");
+
+    if (text.trim()) {
+      reply = text;
+    }
+  }
+} catch (e) {
+  console.error("Errore parsing risposta OpenAI", e);
 }
 
-    res.json({ reply });
-
+res.json({ reply });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Errore nel server" });
