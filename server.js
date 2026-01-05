@@ -1,4 +1,5 @@
 import express from "express";
+import fetch from "node-fetch";
 import cors from "cors";
 
 const app = express();
@@ -11,33 +12,47 @@ app.post("/chat", async (req, res) => {
     const userMessage = req.body.message;
 
     if (!userMessage) {
-      return res.json({ reply: "Messaggio vuoto." });
+      return res.json({ reply: "Dimmi pure 😊" });
     }
 
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        input: userMessage,
-      }),
+        input: [
+          {
+            role: "system",
+            content: "Sei l’assistente ufficiale di Shi.Ku.Dama Terrarium. Rispondi in modo chiaro, utile e naturale."
+          },
+          {
+            role: "user",
+            content: userMessage
+          }
+        ]
+      })
     });
 
     const data = await response.json();
 
-    const reply =
-      data.output_text ??
-      data.output?.[0]?.content?.[0]?.text ??
-      "Errore: risposta AI non disponibile";
+    let reply = "Non sono riuscito a rispondere 😕";
+
+    if (data.output && data.output.length > 0) {
+      const content = data.output[0].content || [];
+      reply = content
+        .filter(c => c.type === "output_text")
+        .map(c => c.text)
+        .join(" ");
+    }
 
     res.json({ reply });
 
-  } catch (error) {
-    console.error("ERRORE SERVER:", error);
-    res.status(500).json({ error: "Errore nel server" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ reply: "Errore del server" });
   }
 });
 
