@@ -39,8 +39,6 @@ app.get("/", (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Errore nel server" });
   }
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Chatbot attivo sulla porta " + PORT);
