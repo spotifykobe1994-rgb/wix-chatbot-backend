@@ -92,8 +92,13 @@ if (
 ) {
   reply = data.choices[0].message.content;
 }
-
-res.json({ reply });
+console.log("RISPOSTA INVIATA A WIX:", reply);
+res.json({
+  reply,
+  answer: reply,
+  text: reply,
+  message: reply
+});
   } catch (error) {
     console.error(error);
     res.status(500).json({ reply: "Errore server" });
