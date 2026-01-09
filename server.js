@@ -1,6 +1,6 @@
-import express from "express";
-import cors from "cors";
-import fetch from "node-fetch";
+const express = require("express");
+const cors = require("cors");
+const fetch = require("node-fetch");
 
 const app = express();
 app.use(cors());
@@ -21,40 +21,38 @@ app.post("/chat", async (req, res) => {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-  model: "gpt-4o-mini",
-  messages: [
-    {
-      role: "system",
-      content: `
-Sei Shi.Ku.Dama Assistant.
-Sei un esperto assoluto di terrarium (chiusi e aperti), muschi, condensa,
-umidità, muffe, luce e manutenzione.
-
-Rispondi sempre in modo tecnico, chiaro e concreto.
-Non chiedere dettagli inutili.
-Se la domanda è generale, spiega comunque in modo completo.
-Niente frasi promozionali.
-`
-    },
-    {
-      role: "user",
-      content: userMessage
-    }
-  ],
-  temperature: 0.4
-})
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Sei Shi.Ku.Dama, esperto assoluto di terrarium chiusi e aperti. " +
+              "Rispondi in modo tecnico, chiaro e completo. " +
+              "Spiega sempre, non fare domande inutili."
+          },
+          {
+            role: "user",
+            content: userMessage
+          }
+        ],
+        temperature: 0.4
+      })
+    });
 
     const data = await response.json();
+    const reply = data.choices[0].message.content;
 
-const reply = data.choices[0].message.content;
-
-return res.json({ reply });
+    res.json({ reply });
   } catch (error) {
     console.error(error);
     res.status(500).json({ reply: "Errore del server" });
   }
 });
 
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log("Server attivo sulla porta " + PORT);
+});
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Server AI attivo sulla porta", PORT);
