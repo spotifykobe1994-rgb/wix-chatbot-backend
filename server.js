@@ -14,39 +14,41 @@ app.post("/chat", async (req, res) => {
       return res.json({ reply: "Dimmi qualcosa sul tuo terrarium 🌿" });
     }
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: [
-          {
-            role: "system",
-            content: `
-Sei l’assistente ufficiale di Shi.Ku.Dama.
-Sei un esperto assoluto di terrarium (chiusi, aperti, muschi, condensa, muffe, luce, acqua).
-Rispondi in modo tecnico, chiaro e concreto.
+  model: "gpt-4o-mini",
+  messages: [
+    {
+      role: "system",
+      content: `
+Sei Shi.Ku.Dama Assistant.
+Sei un esperto assoluto di terrarium (chiusi e aperti), muschi, condensa,
+umidità, muffe, luce e manutenzione.
+
+Rispondi sempre in modo tecnico, chiaro e concreto.
+Non chiedere dettagli inutili.
+Se la domanda è generale, spiega comunque in modo completo.
 Niente frasi promozionali.
-Aiuta davvero l’utente a prendersi cura del suo terrarium.
 `
-          },
-          {
-            role: "user",
-            content: userMessage
-          }
-        ]
-      })
-    });
+    },
+    {
+      role: "user",
+      content: userMessage
+    }
+  ],
+  temperature: 0.4
+})
 
     const data = await response.json();
-    const reply =
-      data.output_text ||
-      "Sto pensando… puoi darmi un dettaglio in più?";
 
-    res.json({ reply });
+const reply = data.choices[0].message.content;
+
+return res.json({ reply });
   } catch (error) {
     console.error(error);
     res.status(500).json({ reply: "Errore del server" });
