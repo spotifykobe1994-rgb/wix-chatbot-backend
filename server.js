@@ -8,8 +8,13 @@ app.use(express.json());
 
 app.post("/chat", async (req, res) => {
   try {
-    const userMessage = req.body.message;
-
+    const userMessage =
+  req.body.message ||
+  req.body.text ||
+  req.body.input ||
+  req.body.query ||
+  "";
+console.log("USER MESSAGE RICEVUTO:", userMessage);
     const response = await fetch(
       "https://api.openai.com/v1/chat/completions",
       {
