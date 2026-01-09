@@ -81,11 +81,19 @@ Se l’utente è inesperto, guidalo passo passo.
 
     const data = await response.json();
 
-    const reply =
-      data.choices?.[0]?.message?.content ||
-      "Errore: risposta AI non disponibile";
+    let reply = "Dimmi qualcosa in più sul tuo terrarium.";
 
-    res.json({ reply });
+if (
+  data &&
+  data.choices &&
+  data.choices[0] &&
+  data.choices[0].message &&
+  typeof data.choices[0].message.content === "string"
+) {
+  reply = data.choices[0].message.content;
+}
+
+res.json({ reply });
   } catch (error) {
     console.error(error);
     res.status(500).json({ reply: "Errore server" });
